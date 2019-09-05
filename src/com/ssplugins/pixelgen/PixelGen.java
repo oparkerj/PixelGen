@@ -1,5 +1,6 @@
 package com.ssplugins.pixelgen;
 
+import com.ssplugins.pixelgen.printers.By3DColorPrinter;
 import com.ssplugins.pixelgen.printers.ByColorPrinter;
 import javafx.application.Application;
 import javafx.stage.Stage;
