@@ -1,2 +1,4 @@
 # PixelGen
-Test project that generates images with a small subset representing one of every color.
+Abandoned project.
+
+This project could try out various different algorithms to create an image with "one of every color."
