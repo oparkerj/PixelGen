@@ -2,18 +2,18 @@ package com.ssplugins.pixelgen.printers;
 
 import com.ssplugins.pixelgen.Pixel;
 import com.ssplugins.pixelgen.PixelPrinter;
-import com.ssplugins.pixelgen.util.Comparing;
 import javafx.scene.paint.Color;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class ByColorPrinter extends PixelPrinter {
+public class MultiByColorPrinter extends PixelPrinter {
     
-    private List<Pixel> startingPoints = new ArrayList<>();
+    private List<Pixel> startingPoints = new LinkedList<>();
     private int side = Pixel.ALL;
     private int compareSide = Pixel.ALL;
     
-    private Set<Pixel> next = new LinkedHashSet<>();
+    private Queue<Pixel> next = new LinkedBlockingQueue<>();
     
     private Pixel[] pixels = new Pixel[9];
     
@@ -26,10 +26,19 @@ public class ByColorPrinter extends PixelPrinter {
         
         // Place pixels
         initGrid();
-        setDrawSize(Integer.MAX_VALUE);
         beginDrawLoop();
         Collections.shuffle(colors);
-//        colors.sort(Comparing.value(Color::getBlue));
+//        colors.sort(Comparing.value(Color::getSaturation));
+        
+        startingPoints.forEach(pixel -> {
+        
+        });
+        
+        colors.parallelStream().forEach(color -> {
+        
+        });
+        
+        
         while (colors.size() > 0) {
             Color color = colors.remove(0);
             Pixel where;
@@ -37,9 +46,9 @@ public class ByColorPrinter extends PixelPrinter {
                 where = startingPoints.remove(0);
             }
             else {
-                Optional<Pixel> min = next.stream().parallel().min(Comparator.comparingDouble(value -> distance(color, value.averageIn(this, compareSide))));
+                Optional<Pixel> min = next.parallelStream().min(Comparator.comparingDouble(value -> distance(color, value.fastAverageIn(this))));
 //                Optional<Pixel> min = next.stream().parallel().min(Comparator.comparingDouble(value -> value.minimumCompare(this, compareSide, color)));
-//                Optional<Pixel> min = next.stream().min(Comparator.comparingDouble(value -> value.averageCompare(this, compareSide, color)));
+//                Optional<Pixel> min = next.parallelStream().min(Comparator.comparingDouble(value -> value.averageCompare(this, compareSide, color)));
                 if (!min.isPresent()) throw new IllegalArgumentException("Could not find placement for pixel.");
                 where = min.get();
             }

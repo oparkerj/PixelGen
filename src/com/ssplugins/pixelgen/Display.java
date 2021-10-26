@@ -7,6 +7,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -15,30 +16,26 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class Display {
     
     private Stage stage;
     private int width;
     private int height;
-    private int colors;
     
     private Scene scene;
     private Pane pane;
     
     private boolean started = false;
-    private Runnable startCallback;
+    private Consumer<MouseEvent> startCallback;
     
     private Canvas canvas;
     
-    public Display(Stage stage, int width, int height, int colors) {
+    public Display(Stage stage, int width, int height) {
         this.stage = stage;
         this.width = width;
         this.height = height;
-        this.colors = colors;
-        if (Math.cbrt(width * height) != colors) {
-            throw new IllegalArgumentException("Number of colors does not match dimensions.");
-        }
     }
     
     public void build() {
@@ -46,18 +43,19 @@ public class Display {
         scene = new Scene(pane, width, height);
         canvas = new Canvas(width, height);
         pane.getChildren().add(canvas);
-        
-        canvas.setOnMouseClicked(event -> {
-            if (started) return;
-            started = true;
-            if (startCallback != null) startCallback.run();
-        });
     
         ContextMenu menu = new ContextMenu();
         MenuItem saveImage = new MenuItem("Save Image");
         saveImage.setOnAction(event -> saveCanvasImage());
         menu.getItems().add(saveImage);
         canvas.setOnContextMenuRequested(event -> menu.show(canvas, event.getScreenX(), event.getScreenY()));
+    
+        canvas.setOnMouseClicked(event -> {
+            menu.hide();
+            if (started) return;
+            started = true;
+            if (startCallback != null) startCallback.accept(event);
+        });
     
         stage.setScene(scene);
         stage.show();
@@ -82,6 +80,10 @@ public class Display {
         Platform.runLater(() -> stage.setTitle(title));
     }
     
+    public int getColors() {
+        return (int) Math.cbrt(width * height);
+    }
+    
     public Canvas getCanvas() {
         return canvas;
     }
@@ -94,11 +96,11 @@ public class Display {
         return height;
     }
     
-    public int getColors() {
-        return colors;
+    public void setStartCallback(Runnable runnable) {
+        this.startCallback = mouseEvent -> runnable.run();
     }
     
-    public void setStartCallback(Runnable startCallback) {
+    public void setStartCallback(Consumer<MouseEvent> startCallback) {
         this.startCallback = startCallback;
     }
     

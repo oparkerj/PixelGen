@@ -40,6 +40,10 @@ public class Pixel {
         return printer.average(buffer);
     }
     
+    public Color fastAverageIn(PixelPrinter printer) {
+        return printer.fastAverage(x, y);
+    }
+    
     public double minimumCompare(PixelPrinter printer, int sides, Color compare) {
         Color[] buffer = printer.surround(this, sides);
         return Arrays.stream(buffer).filter(Objects::nonNull).mapToDouble(color -> printer.distance(color, compare)).min().orElse(0);

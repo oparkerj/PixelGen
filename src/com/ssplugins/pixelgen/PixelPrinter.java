@@ -6,8 +6,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,6 +51,7 @@ public abstract class PixelPrinter {
     }
     
     public final void beginDrawLoop() {
+        System.out.println("Starting draw loop");
         if (drawLoop != null) {
             drawLoop.start();
             return;
@@ -65,6 +64,7 @@ public abstract class PixelPrinter {
                     if (output.size() == 0) {
                         if (!active) {
                             this.stop();
+                            System.out.println("Draw loop finished queue.");
                         }
                         return;
                     }
@@ -77,6 +77,7 @@ public abstract class PixelPrinter {
     
     public final void endDrawLoop() {
         if (drawLoop == null) return;
+        System.out.println("Stopping draw loop.");
         drawLoop.stop();
     }
     
@@ -150,6 +151,27 @@ public abstract class PixelPrinter {
                 arr[index] = grid[x + i][y + j];
             }
         }
+    }
+    
+    public final Color fastAverage(int x, int y) {
+        double r = 0;
+        double g = 0;
+        double b = 0;
+        int total = 0;
+        for (int i = -1; i < 2; ++i) {
+            if (x + i == -1 || x + i == width) continue;
+            for (int j = -1; j < 2; ++j) {
+                if (y + j == -1 || y + j == height) continue;
+                if (i == 0 && j == 0) continue;
+                Color c = grid[x + i][y + j];
+                if (c == null) continue;
+                r += c.getRed();
+                g += c.getGreen();
+                b += c.getBlue();
+                ++total;
+            }
+        }
+        return Color.color(r / total, g / total, b / total);
     }
     
     public final void surroundSize(Color[] arr, int x, int y, int size) {
